@@ -51,5 +51,13 @@ func myInit(internalInput bool) {
 }
 
 func TestGetConnByPwd(t *testing.T) {
-	getConnByPwd()
+	connectByPwd("192.168.100.128", "lixuecheng", "lixuecheng")
+}
+
+func TestExecuteCmdByPwd(t *testing.T) {
+	executeCmdByPwd("uptime", "192.168.100.128", "lixuecheng", "lixuecheng")
+}
+
+func TestExecuteScpByPwd(t *testing.T) {
+	executeCatByPwd("192.168.100.128", "lixuecheng", "lixuecheng", "/home/lixuecheng/tmp_file", "D:\\tmpHome\\.ssh\\known_hosts")
 }

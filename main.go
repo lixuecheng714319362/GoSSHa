@@ -714,5 +714,4 @@ func main() {
 	//initialize(false)
 	//sendProxyReply(&InitializeComplete{InitializeComplete: true})
 	//runProxy()
-	getConnByPwd()
 }
