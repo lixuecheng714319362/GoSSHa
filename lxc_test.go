@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"testing"
 )
 
 func myInit(internalInput bool) {
@@ -47,4 +48,8 @@ func myInit(internalInput bool) {
 	go maxThroughputThread()
 
 	makeSigners()
+}
+
+func TestGetConnByPwd(t *testing.T) {
+	getConnByPwd()
 }

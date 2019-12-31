@@ -173,6 +173,7 @@ func makeConfig() (config *ssh.ClientConfig, agentUnixSock net.Conn) {
 	var err error
 
 	if sshAuthSock != "" {
+		fmt.Println("sshAuthSock is not empty!!!!!!")
 		for {
 			agentUnixSock, err = net.Dial("unix", sshAuthSock)
 
@@ -193,7 +194,7 @@ func makeConfig() (config *ssh.ClientConfig, agentUnixSock net.Conn) {
 		}
 	}
 
-	fmt.Printf("the length of signers is %v\n", len(signers))
+	fmt.Printf("the length of signers in makeConfig is %v\n", len(signers))
 	if len(signers) > 0 {
 		clientAuth = append(clientAuth, ssh.PublicKeys(signers...))
 	}
@@ -208,6 +209,7 @@ func makeConfig() (config *ssh.ClientConfig, agentUnixSock net.Conn) {
 }
 
 func makeSigner(keyname string) (signer ssh.Signer, err error) {
+	fmt.Println("=======make every key=========")
 	fp, err := os.Open(keyname)
 	if err != nil {
 		if !os.IsNotExist(err) {
@@ -297,6 +299,7 @@ func makeSigners() {
 	signers = []ssh.Signer{}
 
 	for _, keyname := range keys {
+		fmt.Printf("key name is %v\n", keyname)
 		signer, err := makeSigner(keyname)
 		if err == nil {
 			signers = append(signers, signer)
@@ -410,6 +413,7 @@ func executeCmd(cmd string, hostname string) (stdout, stderr string, err error) 
 		return
 	}
 
+	fmt.Println("start new session")
 	session, err := conn.NewSession()
 	if err != nil {
 		return
@@ -423,6 +427,7 @@ func executeCmd(cmd string, hostname string) (stdout, stderr string, err error) 
 	var stderrBuf bytes.Buffer
 	session.Stdout = &stdoutBuf
 	session.Stderr = &stderrBuf
+	fmt.Println("start run cmd")
 	err = session.Run(cmd)
 
 	stdout = stdoutBuf.String()
@@ -466,7 +471,8 @@ func initialize(internalInput bool) {
 	flag.Uint64Var(&maxConnections, "m", 0, "Maximum simultaneous connections")
 	flag.Parse()
 
-	keys = []string{os.Getenv("HOME") + "/.ssh/id_rsa", os.Getenv("HOME") + "/.ssh/id_dsa", os.Getenv("HOME") + "/.ssh/id_ecdsa"}
+	keysPath := os.Getenv("TMP_HOME")
+	keys = []string{keysPath + "/.ssh/id_rsa", keysPath + "/.ssh/id_dsa", keysPath + "/.ssh/id_ecdsa"}
 
 	fmt.Printf("keys is %v\n", keys)
 	if pubKey != "" {
@@ -495,6 +501,7 @@ func initialize(internalInput bool) {
 }
 
 func jsonReplierThread() {
+	fmt.Println("======enter jsonReplierThread=======")
 	connectionReporting := true
 
 	for {
@@ -607,6 +614,7 @@ func getExecFunc(msg *ProxyRequest) func(string) *SshResult {
 }
 
 func runAction(msg *ProxyRequest) {
+	fmt.Println("=======enter run action =========")
 	execFunc := getExecFunc(msg)
 	if execFunc == nil {
 		return
@@ -633,6 +641,7 @@ func runAction(msg *ProxyRequest) {
 	maxConcurrencyCh := make(chan struct{}, maxConcurrency)
 
 	for _, h := range msg.Hosts {
+		fmt.Println("go func exec cmd")
 		go func(h string) {
 			maxConcurrencyCh <- struct{}{}
 			defer func() { <-maxConcurrencyCh }()
@@ -677,6 +686,7 @@ func inputDecoder() {
 			reportCriticalErrorToUser("Cannot parse JSON: " + err.Error())
 			continue
 		}
+		fmt.Printf("this time, msg is %v\n", msg)
 
 		requestsChan <- msg
 	}
@@ -692,6 +702,7 @@ func runProxy() {
 	for msg := range requestsChan {
 		switch {
 		case msg.Action == "ssh" || msg.Action == "scp":
+			fmt.Println("runProxy, action is ssh or scp")
 			runAction(msg)
 		default:
 			reportCriticalErrorToUser("Unsupported action: " + msg.Action)
@@ -700,7 +711,8 @@ func runProxy() {
 }
 
 func main() {
-	initialize(false)
-	sendProxyReply(&InitializeComplete{InitializeComplete: true})
-	runProxy()
+	//initialize(false)
+	//sendProxyReply(&InitializeComplete{InitializeComplete: true})
+	//runProxy()
+	getConnByPwd()
 }
