@@ -12,25 +12,17 @@ import (
 	"strings"
 )
 
-type CmdInfo struct {
-	Cmd string
-	Action string
-	TargetFile string//not empty only use scp
-	SourceFile string//not empty only use scp
-}
-
 func connect2Server() {
 	initialize(true)
 
 }
 
-//连接一台主机，执行多条命令，执行完成后断开连接
-func executeLinuxCmd(infos []CmdInfo, hostname, user, password string) {
+//连接一台主机，按照shell执行命令，执行完成后断开连接
+func executeBatchSshCmd(cmds string, hostname, user, password string) (stdout, stderr string, err error) {
 	conn, err := getConnectionByPwd(hostname, user, password)
 	if err != nil {
 		return
 	}
-
 	session, err := conn.NewSession()
 	if err != nil {
 		return
@@ -40,67 +32,28 @@ func executeLinuxCmd(infos []CmdInfo, hostname, user, password string) {
 	}
 	defer session.Close()
 
-	for _, cmdInfo := range infos {
-		switch {
-		case cmdInfo.Action == "ssh" :
-			executeSsh(session, cmdInfo.Cmd)
-		case cmdInfo.Action == "scp" :
-			executeScp(session, cmdInfo.TargetFile, cmdInfo.SourceFile)
-		}
+	cmdlist := strings.Split(cmds, ";")
+	stdinBuf, err := session.StdinPipe()
+	if err != nil {
+		return
 	}
-}
-
-func executeSsh(session *ssh.Session, cmd string) (stdout, stderr string, err error) {
 	var stdoutBuf bytes.Buffer
 	var stderrBuf bytes.Buffer
 	session.Stdout = &stdoutBuf
 	session.Stderr = &stderrBuf
-	fmt.Printf("start run cmd, cmd is %v\n", cmd)
-	err = session.Run(cmd)
-	stdout = stdoutBuf.String()
-	stderr = stderrBuf.String()
-	return
-}
-
-func executeScp(session *ssh.Session, target, source string) (stdout, stderr string, err error) {
-	fmt.Println("==========start scp")
-	cmd := "cat >'" + strings.Replace(target, "'", "'\\''", -1) + "'"
-	stdinPipe, err := session.StdinPipe()
+	err = session.Shell()
 	if err != nil {
 		return
 	}
-
-	var stdoutBuf bytes.Buffer
-	var stderrBuf bytes.Buffer
-	session.Stdout = &stdoutBuf
-	session.Stderr = &stderrBuf
-
-	fmt.Printf("start run scp cmd, cmd is %v\n", cmd)
-	err = session.Start(cmd)
+	for _, c := range cmdlist {
+		c = c + "\n"
+		stdinBuf.Write([]byte(c))
+	}
+	err = stdinBuf.Close()
 	if err != nil {
 		return
 	}
-
-	contents := readSourceFile(source)
-	for start, maxEnd := 0, len(contents); start < maxEnd; start += chunkSize {
-		<-maxThroughputChan
-
-		end := start + chunkSize
-		if end > maxEnd {
-			end = maxEnd
-		}
-		_, err = stdinPipe.Write(contents[start:end])
-		if err != nil {
-			return
-		}
-	}
-
-	err = stdinPipe.Close()
-	if err != nil {
-		return
-	}
-
-	err = session.Wait()
+	session.Wait()
 	stdout = stdoutBuf.String()
 	stderr = stderrBuf.String()
 	fmt.Printf("stdout is %v\n", stdout)

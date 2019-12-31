@@ -79,50 +79,10 @@ func TestExecuteScpByPwd(t *testing.T) {
 	executeCmdByPwd("rm -rf /home/lixuecheng/tmp_file", "192.168.100.128", "lixuecheng", "lixuecheng")
 }
 
-func buildCmdInfos() (cmdInfo1, cmdInfo2, cmdInfo3 []CmdInfo) {
-	var ret1, ret2, ret3 []CmdInfo
-	info1 := CmdInfo{
-		Cmd:        "touch liteidex36.2.linux64-qt5.5.1.tar.gz",
-		Action:     "ssh",
-		TargetFile: "",
-		SourceFile: "",
-	}
-	info2 := CmdInfo{
-		Cmd:        "",
-		Action:     "scp",
-		TargetFile: "/home/lixuecheng/liteidex36.2.linux64-qt5.5.1.tar.gz",
-		SourceFile: "D:\\tmpHome\\liteidex36.2.linux64-qt5.5.1.tar.gz",
-	}
-	info3 := CmdInfo{
-		Cmd:        "tar -zxvf liteidex36.2.linux64-qt5.5.1.tar.gz -C /home/lixuecheng",
-		Action:     "ssh",
-		TargetFile: "",
-		SourceFile: "",
-	}
-	info4 := CmdInfo{
-		Cmd:        "rm -rf /home/lixuecheng/liteidex36.2.linux64-qt5.5.1.tar.gz",
-		Action:     "ssh",
-		TargetFile: "",
-		SourceFile: "",
-	}
-	info5 := CmdInfo{
-		Cmd:        "rm -rf /home/lixuecheng/liteide",
-		Action:     "ssh",
-		TargetFile: "",
-		SourceFile: "",
-	}
+func TestExecuteBatchSshCmd(t *testing.T) {
+	executeCmdByPwd("touch liteidex36.2.linux64-qt5.5.1.tar.gz", "192.168.100.128", "lixuecheng", "lixuecheng")
+	executeCatByPwd("192.168.100.128", "lixuecheng", "lixuecheng", "/home/lixuecheng/liteidex36.2.linux64-qt5.5.1.tar.gz", "D:\\tmpHome\\liteidex36.2.linux64-qt5.5.1.tar.gz")
 
-	ret1 = append(ret1, info1)
-	ret2 = append(ret2, info2)
-	ret3 = append(ret3, info3)
-	ret3 = append(ret3, info4)
-	ret3 = append(ret3, info5)
-	return ret1, ret2, ret3
-}
-
-func TestSshAndScp(t *testing.T) {
-	cmdInfos1, cmdInfos2, cmdInfos3:= buildCmdInfos()
-	executeLinuxCmd(cmdInfos1, "192.168.100.128", "lixuecheng", "lixuecheng")
-	executeLinuxCmd(cmdInfos2, "192.168.100.128", "lixuecheng", "lixuecheng")
-	executeLinuxCmd(cmdInfos3, "192.168.100.128", "lixuecheng", "lixuecheng")
+	cmds := "tar -zxvf liteidex36.2.linux64-qt5.5.1.tar.gz -C /home/lixuecheng;ls -l;rm -rf /home/lixuecheng/liteidex36.2.linux64-qt5.5.1.tar.gz;"
+	executeBatchSshCmd(cmds, "192.168.100.128", "lixuecheng", "lixuecheng")
 }
