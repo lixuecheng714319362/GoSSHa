@@ -275,3 +275,15 @@ func TestLimitConcurrency(t *testing.T) {
 		t.Fatalf("Too many servers responded: got %d, expected %d", answeredServers, maxAnsweredServers)
 	}
 }
+
+func TestConnetct(t *testing.T) {
+
+	myInit(true)
+	hostName := "192.168.100.128"
+	fmt.Println("============start connect")
+	getConnection(hostName)
+}
+
+func TestAnything(t *testing.T) {
+	fmt.Println(os.Getenv("HOME"))
+}

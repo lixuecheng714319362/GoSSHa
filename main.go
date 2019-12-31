@@ -167,6 +167,7 @@ func releaseAgent() {
 }
 
 func makeConfig() (config *ssh.ClientConfig, agentUnixSock net.Conn) {
+	fmt.Println("=============make config=============")
 	clientAuth := []ssh.AuthMethod{}
 
 	var err error
@@ -192,6 +193,7 @@ func makeConfig() (config *ssh.ClientConfig, agentUnixSock net.Conn) {
 		}
 	}
 
+	fmt.Printf("the length of signers is %v\n", len(signers))
 	if len(signers) > 0 {
 		clientAuth = append(clientAuth, ssh.PublicKeys(signers...))
 	}
@@ -291,6 +293,7 @@ func makeSigner(keyname string) (signer ssh.Signer, err error) {
 }
 
 func makeSigners() {
+	fmt.Println("============make signers===============")
 	signers = []ssh.Signer{}
 
 	for _, keyname := range keys {
@@ -299,9 +302,11 @@ func makeSigners() {
 			signers = append(signers, signer)
 		}
 	}
+	fmt.Printf("the length of signer in makeSingers is %v\n", len(signers))
 }
 
 func getConnection(hostname string) (conn *ssh.Client, err error) {
+	fmt.Println("=====enter get connection=====")
 	conn, ok := connectedHosts.Get(hostname)
 	if ok {
 		return
@@ -327,6 +332,7 @@ func getConnection(hostname string) (conn *ssh.Client, err error) {
 		hostname = str[0]
 		port = str[1]
 	}
+	fmt.Printf("the host is %v, and the port is %v\n", hostname, port)
 
 	conn, err = ssh.Dial("tcp", hostname+":"+port, conf)
 	if err != nil {
@@ -335,6 +341,9 @@ func getConnection(hostname string) (conn *ssh.Client, err error) {
 
 	sendProxyReply(&ConnectionProgress{ConnectedHost: hostname})
 
+	if conn != nil {
+		fmt.Println("建立连接了？")
+	}
 	connectedHosts.Set(hostname, conn)
 	return
 }
@@ -459,6 +468,7 @@ func initialize(internalInput bool) {
 
 	keys = []string{os.Getenv("HOME") + "/.ssh/id_rsa", os.Getenv("HOME") + "/.ssh/id_dsa", os.Getenv("HOME") + "/.ssh/id_ecdsa"}
 
+	fmt.Printf("keys is %v\n", keys)
 	if pubKey != "" {
 		if strings.HasSuffix(pubKey, ".pub") {
 			pubKey = strings.TrimSuffix(pubKey, ".pub")
@@ -474,6 +484,7 @@ func initialize(internalInput bool) {
 	}
 
 	if !internalInput {
+		fmt.Println("!internalInput")
 		go inputDecoder()
 		go jsonReplierThread()
 	}
