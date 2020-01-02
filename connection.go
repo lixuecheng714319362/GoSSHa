@@ -202,8 +202,8 @@ func getConnectionByPwd(hostname, user, password string) (conn *ssh.Client, err 
 		}
 	}()
 
-	// waitAgent()
-	//defer releaseAgent()
+	waitAgent()
+	defer releaseAgent()
 
 	port := "22"
 	str := strings.SplitN(hostname, ":", 2)

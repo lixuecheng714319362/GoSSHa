@@ -27,6 +27,15 @@ func TestInstallDockerCompose(t *testing.T) {
 func TestSendFabricImages(t *testing.T) {
 	sendFabricImages(hostname, user_test, passwd_test)
 }
+
+func TestTarFabricImages(t *testing.T) {
+	tarFabricImages(hostname, user_test, passwd_test)
+}
+
+func TestLoadDockerImages(t *testing.T) {
+	loadDockerImages(hostname, user_test, passwd_test)
+}
+
 func TestTestR(t *testing.T) {
 	testR()
 }

@@ -82,17 +82,39 @@ func sendFabricImages(hostname, user, passwd string) {
 			executeCatByPwd(hostname, user, passwd, targetPrefix+tmp, sourcePrefix+tmp)
 		}(files1[i])
 	}
+	time.Sleep(2000)
 	var files2 = []string{"javaenv.tar.0", "javaenv.tar.1", "javaenv.tar.2", "tools.tar.0", "tools.tar.1"}
 	for i := 0; i < len(files2); i++ {
-		wg.Add(1)
-		go func(tmp string) {
-			defer wg.Done()
-			executeCatByPwd(hostname, user, passwd, targetPrefix+tmp, sourcePrefix+tmp)
-		}(files2[i])
+		executeCatByPwd(hostname, user, passwd, targetPrefix+files2[i], sourcePrefix+files2[i])
 	}
 
-	fmt.Printf("the length of map is %v\n", len(connectedHosts.v))
 	wg.Wait()
+}
+
+//tar -zcvf farbric images
+func tarFabricImages(hostname, user, passwd string) {
+	cmds := "cd /home/" + user + "/fabric/images;mkdir -p images_untar;cd images_untar;"
+	cmds += "tar -xzvf ../baseos.tar;"
+	cmds += "tar -xzvf ../ca.tar;"
+	cmds += "tar -xzvf ../ccenv.tar;"
+	cmds += "tar -xzvf ../couchdb.tar;"
+	cmds += "tar -xzvf ../kafka.tar;"
+	cmds += "tar -xzvf ../orderer.tar;"
+	cmds += "tar -xzvf ../peer.tar;"
+	cmds += "tar -xzvf ../zookeeper.tar;"
+	cmds += "cat ../tools.tar.* | tar -zxv;"
+	cmds += "cat ../javaenv.tar.* | tar -zxv;"
+	executeBatchSshCmd(cmds, hostname, user, passwd)
+}
+
+//load docker images
+func loadDockerImages(hostname, user, passwd string) {
+	cmds := "cd /home/" + user + "/fabric/images/images_untar;"
+	var files = []string{"baseos", "ca", "ccenv", "couchdb", "javaenv", "kafka", "orderer", "peer", "tools", "zookeeper"}
+	for i := 0; i < len(files); i++ {
+		cmds += "sudo docker load < " + files[i] + ";"
+	}
+	executeBatchSshCmd(cmds, hostname, user, passwd)
 }
 
 var synWait sync.WaitGroup
