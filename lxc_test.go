@@ -86,3 +86,9 @@ func TestExecuteBatchSshCmd(t *testing.T) {
 	cmds := "tar -zxvf liteidex36.2.linux64-qt5.5.1.tar.gz -C /home/lixuecheng;ls -l;rm -rf /home/lixuecheng/liteidex36.2.linux64-qt5.5.1.tar.gz;"
 	executeBatchSshCmd(cmds, "192.168.100.128", "lixuecheng", "lixuecheng")
 }
+
+func TestDockerCmd(t *testing.T) {
+	executeCmdByPwd("sudo docker images", "192.168.100.128", "lixuecheng", "lixuecheng")
+	//cmds := "sudo docker ps;lixuecheng"
+	//executeBatchSshCmd(cmds, "192.168.100.128", "lixuecheng", "lixuecheng")
+}

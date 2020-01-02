@@ -12,11 +12,6 @@ import (
 	"strings"
 )
 
-func connect2Server() {
-	initialize(true)
-
-}
-
 //连接一台主机，按照shell执行命令，执行完成后断开连接
 func executeBatchSshCmd(cmds string, hostname, user, password string) (stdout, stderr string, err error) {
 	conn, err := getConnectionByPwd(hostname, user, password)
