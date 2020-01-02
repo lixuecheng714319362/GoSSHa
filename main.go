@@ -22,10 +22,10 @@ import (
 )
 
 const (
-	defaultTimeout             = 30000 // default timeout for operations (in milliseconds)
-	chunkSize                  = 65536 // chunk size in bytes for scp
-	throughputSleepInterval    = 100   // how many milliseconds to sleep between writing "tickets" to channel in maxThroughputThread
-	minChunks                  = 10    // minimum allowed count of chunks to be sent per sleep interval
+	defaultTimeout             = 30000  // default timeout for operations (in milliseconds)
+	chunkSize                  = 655360 // chunk size in bytes for scp
+	throughputSleepInterval    = 100    // how many milliseconds to sleep between writing "tickets" to channel in maxThroughputThread
+	minChunks                  = 20     // minimum allowed count of chunks to be sent per sleep interval
 	minThroughput              = chunkSize * minChunks * (1000 / throughputSleepInterval)
 	maxOpensshAgentConnections = 128 // default connection backlog for openssh
 )
@@ -42,7 +42,7 @@ var (
 	maxThroughput uint64 // max throughput (for scp) in bytes per second
 
 	agentConnChan      = make(chan chan bool) // channel for getting "ticket" for new agent connection
-	agentConnFreeChan  = make(chan bool, 10)  // channel for freeing connections
+	agentConnFreeChan  = make(chan bool, 50)  // channel for freeing connections
 	sshAuthSock        string
 	maxConnections     uint64 // max concurrent ssh connections
 	disconnectAfterUse bool   // close connection after each action

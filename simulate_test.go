@@ -23,3 +23,10 @@ func TestInstallDocker(t *testing.T) {
 func TestInstallDockerCompose(t *testing.T) {
 	installDockerCompose(hostname, user_test, passwd_test)
 }
+
+func TestSendFabricImages(t *testing.T) {
+	sendFabricImages(hostname, user_test, passwd_test)
+}
+func TestTestR(t *testing.T) {
+	testR()
+}

@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"golang.org/x/crypto/ssh"
 	"io/ioutil"
 	"log"
 	"net"
 	"os"
 	"strings"
+
+	"golang.org/x/crypto/ssh"
 )
 
 //连接一台主机，按照shell执行命令，执行完成后断开连接
@@ -89,6 +90,28 @@ func executeCatByPwd(hostname, user, password, target, source string) (stdout, s
 	if err != nil {
 		return
 	}
+
+	//use stream
+	// f, err := os.Open(source)
+	// defer f.Close()
+	// if err != nil {
+	// 	return
+	// }
+	// buf := bufio.NewReader(f)
+
+	// for {
+	// 	line, _, err := buf.ReadLine()
+	// 	if err != nil {
+	// 		if err == io.EOF {
+	// 			return "", "", err
+	// 		}
+	// 		return "", "", err
+	// 	}
+	// 	_, err = stdinPipe.Write(line)
+	// 	if err != nil {
+	// 		return "", "", err
+	// 	}
+	// }
 
 	contents := readSourceFile(source)
 	for start, maxEnd := 0, len(contents); start < maxEnd; start += chunkSize {
@@ -179,8 +202,8 @@ func getConnectionByPwd(hostname, user, password string) (conn *ssh.Client, err 
 		}
 	}()
 
-	waitAgent()
-	defer releaseAgent()
+	// waitAgent()
+	//defer releaseAgent()
 
 	port := "22"
 	str := strings.SplitN(hostname, ":", 2)
@@ -190,7 +213,7 @@ func getConnectionByPwd(hostname, user, password string) (conn *ssh.Client, err 
 	}
 	fmt.Printf("the host is %v, and the port is %v\n", hostname, port)
 
-	conn, err = ssh.Dial("tcp", hostname + ":" + port, &ssh.ClientConfig{
+	conn, err = ssh.Dial("tcp", hostname+":"+port, &ssh.ClientConfig{
 		User: user,
 		Auth: []ssh.AuthMethod{ssh.Password(password)},
 		HostKeyCallback: func(hostname string, remote net.Addr, key ssh.PublicKey) error {
@@ -201,9 +224,10 @@ func getConnectionByPwd(hostname, user, password string) (conn *ssh.Client, err 
 		return
 	}
 
-	//sendProxyReply(&ConnectionProgress{ConnectedHost: hostname})
+	// sendProxyReply(&ConnectionProgress{ConnectedHost: hostname})
 
 	connectedHosts.Set(hostname, conn)
+	fmt.Println("connect success!=====")
 	return
 }
 
@@ -214,7 +238,7 @@ func connectByPwd(hostName, user, password string) {
 		}
 	}
 
-	client, err := ssh.Dial("tcp", hostName + ":22", &ssh.ClientConfig{
+	client, err := ssh.Dial("tcp", hostName+":22", &ssh.ClientConfig{
 		User: user,
 		Auth: []ssh.AuthMethod{ssh.Password(password)},
 		HostKeyCallback: func(hostname string, remote net.Addr, key ssh.PublicKey) error {
