@@ -1,0 +1,13 @@
+
+test:
+  user:
+    - Tom
+    - Lily
+    - Skay
+ 
+  mqtt:
+     host: localhost:1883
+     username: test
+     password: test
+ 
+  http: {port: "8080", host: "127.0.0.1"}

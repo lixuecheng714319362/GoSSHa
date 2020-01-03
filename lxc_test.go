@@ -93,3 +93,7 @@ func TestDockerCmd(t *testing.T) {
 	//cmds := "sudo docker ps;lixuecheng"
 	//executeBatchSshCmd(cmds, "192.168.100.128", "lixuecheng", "lixuecheng")
 }
+
+func TestReadyaml(t *testing.T) {
+	ReadYamlConfig("config.yaml")
+}
