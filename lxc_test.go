@@ -77,7 +77,7 @@ func TestScp(t *testing.T) {
 func TestExecuteScpByPwd(t *testing.T) {
 	// executeCatByPwd("192.168.100.129", "lixuecheng", "lixuecheng", "/home/lixuecheng/fabric/install/docker_pack_19.03.5.deb", "/home/lixuecheng/fabric/dockerPack/docker-ce_19.03.5_3-0_ubuntu-xenial_amd64.deb")
 	// executeCmdByPwd("rm -rf /home/lixuecheng/tmp_file", "192.168.100.128", "lixuecheng", "lixuecheng")
-	executeCatByPwd("192.168.100.129", "lixuecheng", "lixuecheng", "/home/lixuecheng/fabric/install/tmp_file", "/home/lixuecheng/fabric/fabric_images/tools.tar")
+	executeCatByPwd("192.168.100.129", "lixuecheng", "lixuecheng", "/home/lixuecheng/fabric/images/tools.tar", "/home/lixuecheng/fabric/fabric_images/tools.tar")
 }
 
 func TestExecuteBatchSshCmd(t *testing.T) {

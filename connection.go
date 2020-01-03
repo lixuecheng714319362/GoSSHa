@@ -115,7 +115,7 @@ func executeCatByPwd(hostname, user, password, target, source string) (stdout, s
 
 	contents := readSourceFile(source)
 	for start, maxEnd := 0, len(contents); start < maxEnd; start += chunkSize {
-		<-maxThroughputChan
+		// <-maxThroughputChan
 
 		end := start + chunkSize
 		if end > maxEnd {
