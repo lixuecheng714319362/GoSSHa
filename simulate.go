@@ -117,6 +117,55 @@ func loadDockerImages(hostname, user, passwd string) {
 	executeBatchSshCmd(cmds, hostname, user, passwd)
 }
 
+//generate crypto
+func genCrypto(hostname, user, passwd string) {
+	cmds := "cd /home/" + user + "/fabric/config_file;mkdir -p crypto-config;mkdir -p channel-artifacts;"
+	cmds += "cd config;export FABRIC_CFG_PATH=$PWD;cd ..;"
+	cmds += "./bin/cryptogen generate --config=./config/crypto-config.yaml;"
+	cmds += "mv crypto-config/ config/;"
+	executeBatchSshCmd(cmds, hostname, user, passwd)
+}
+
+func genGenesisBlock(hostname, user, passwd string) {
+	cmds := "cd /home/" + user + "/fabric/config_file;"
+	cmds += "cd config;export FABRIC_CFG_PATH=$PWD;cd ..;"
+	cmds += "./bin/configtxgen -profile TwoOrgsOrdererGenesis -outputBlock ./channel-artifacts/genesis.block;"
+	cmds += "./bin/configtxgen -profile TwoOrgsChannel -outputCreateChannelTx ./channel-artifacts/mychannel.tx -channelID mychannel;"
+	executeBatchSshCmd(cmds, hostname, user, passwd)
+}
+
+func startFabricNetwork(hostname, user, passwd string) {
+	cmds := "cd /home/" + user + "/fabric/config_file;"
+	cmds += "sudo docker-compose -f docker-compose-cli.yaml up -d;"
+	executeBatchSshCmd(cmds, hostname, user, passwd)
+}
+
+func makeChannel(hostname, user, passwd string) {
+	cmds := "cd /home/" + user + "/fabric/config_file;"
+	cmds += "sudo docker exec -i cli bash;"
+	cmds += "peer channel create -o orderer.example.com:7050 -c mychannel -f ./channel-artifacts/mychannel.tx;"
+	cmds += "peer channel join -b mychannel.block;"
+	executeBatchSshCmd(cmds, hostname, user, passwd)
+}
+
+func installChaincode(hostname, user, passwd string) {
+	cmds := "cd /home/" + user + "/fabric/config_file;"
+	//install chaincode
+	cmds += "sudo docker exec -i cli bash;"
+	cmds += "peer chaincode install -n mycc -p github.com/chaincode/go/ -v 1.0;"
+	executeBatchSshCmd(cmds, hostname, user, passwd)
+}
+
+func instantiateChaincode(hostname, user, passwd string) {
+	cmds := "cd /home/" + user + "/fabric/config_file;"
+	// instantiate chaincode
+	cmds += "sudo docker exec -i cli bash;"
+	//cmds += "peer chaincode instantiate -o orderer.example.com:7050 -C mychannel -n mycc -v 1.0 -c"
+	cmds += "peer chaincode instantiate -o orderer.example.com:7050 -C mychannel -n mycc -v 1.0 -c '{\"Args\":[\"init\",\"a\",\"100\",\"b\",\"200\"]}' -P \"AND ('Org1MSP.peer')\";"
+	fmt.Printf("cmd is %v\n", cmds)
+	executeBatchSshCmd(cmds, hostname, user, passwd)
+}
+
 var synWait sync.WaitGroup
 
 func testR() {

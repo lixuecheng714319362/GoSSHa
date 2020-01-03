@@ -3,7 +3,7 @@ package main
 import "testing"
 
 var (
-	hostname    = "192.168.100.129"
+	hostname    = "192.168.100.132"
 	user_test   = "lixuecheng"
 	passwd_test = "lixuecheng"
 )
@@ -34,6 +34,30 @@ func TestTarFabricImages(t *testing.T) {
 
 func TestLoadDockerImages(t *testing.T) {
 	loadDockerImages(hostname, user_test, passwd_test)
+}
+
+func TestGenCrypto(t *testing.T) {
+	genCrypto(hostname, user_test, passwd_test)
+}
+
+func TestGenGenesisBlock(t *testing.T) {
+	genGenesisBlock(hostname, user_test, passwd_test)
+}
+
+func TestStartFabricNetwork(t *testing.T) {
+	startFabricNetwork(hostname, user_test, passwd_test)
+}
+
+func TestMakeChannel(t *testing.T) {
+	makeChannel(hostname, user_test, passwd_test)
+}
+
+func TestInstallChaincode(t *testing.T) {
+	installChaincode(hostname, user_test, passwd_test)
+}
+
+func TestInstantiateChaincode(t *testing.T) {
+	instantiateChaincode(hostname, user_test, passwd_test)
 }
 
 func TestTestR(t *testing.T) {
