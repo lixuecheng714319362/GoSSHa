@@ -97,17 +97,13 @@ func executeCatByPwd(hostname, user, password, target, source string) (stdout, s
 	// if err != nil {
 	// 	return
 	// }
-	// buf := bufio.NewReader(f)
+	// buf := bufio.NewScanner(f)
 
-	// for {
-	// 	line, _, err := buf.ReadLine()
-	// 	if err != nil {
-	// 		if err == io.EOF {
-	// 			return "", "", err
-	// 		}
-	// 		return "", "", err
-	// 	}
-	// 	_, err = stdinPipe.Write(line)
+	// for buf.Scan() {
+	// 	// line, _, err := buf.ReadLine()
+	// 	line := buf.Text()
+
+	// 	_, err = stdinPipe.Write([]byte(line))
 	// 	if err != nil {
 	// 		return "", "", err
 	// 	}

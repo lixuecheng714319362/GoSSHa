@@ -61,11 +61,11 @@ func sendFabricImages(hostname, user, passwd string) {
 	//make images folder
 	cmds := "cd /home/" + user + "/fabric;mkdir -p images;cd images;"
 	cmds += "touch baseos.tar;touch ca.tar;touch ccenv.tar;touch couchdb.tar;touch kafka.tar;touch orderer.tar;touch peer.tar;touch zookeeper.tar;"
-	cmds += "touch javaenv.tar.0;touch javaenv.tar.2;touch javaenv.tar.1;"
-	cmds += "touch tools.tar.0;touch tools.tar.1;"
+	cmds += "touch javaenv.tar;"
+	cmds += "touch tools.tar;"
 	executeBatchSshCmd(cmds, hostname, user, passwd)
 
-	var wg sync.WaitGroup
+	// var wg sync.WaitGroup
 	fmt.Println("=====start scp images=====")
 	targetPrefix := "/home/" + user + "/fabric/images/"
 	sourcePrefix := "/home/lixuecheng/fabric/fabric_images/"
@@ -76,19 +76,20 @@ func sendFabricImages(hostname, user, passwd string) {
 	runtime.GOMAXPROCS(num)
 	var files1 = []string{"baseos.tar", "ca.tar", "ccenv.tar", "couchdb.tar", "kafka.tar", "orderer.tar", "peer.tar", "zookeeper.tar"}
 	for i := 0; i < len(files1); i++ {
-		wg.Add(1)
-		go func(tmp string) {
-			defer wg.Done()
-			executeCatByPwd(hostname, user, passwd, targetPrefix+tmp, sourcePrefix+tmp)
-		}(files1[i])
+		// wg.Add(1)
+		// go func(tmp string) {
+		// 	defer wg.Done()
+		// 	executeCatByPwd(hostname, user, passwd, targetPrefix+tmp, sourcePrefix+tmp)
+		// }(files1[i])
+		executeCatByPwd(hostname, user, passwd, targetPrefix+files1[i], sourcePrefix+files1[i])
 	}
-	time.Sleep(2000)
-	var files2 = []string{"javaenv.tar.0", "javaenv.tar.1", "javaenv.tar.2", "tools.tar.0", "tools.tar.1"}
+	// time.Sleep(2000)
+	var files2 = []string{"javaenv.tar", "tools.tar"}
 	for i := 0; i < len(files2); i++ {
 		executeCatByPwd(hostname, user, passwd, targetPrefix+files2[i], sourcePrefix+files2[i])
 	}
 
-	wg.Wait()
+	// wg.Wait()
 }
 
 //tar -zcvf farbric images
@@ -162,7 +163,6 @@ func instantiateChaincode(hostname, user, passwd string) {
 	cmds += "sudo docker exec -i cli bash;"
 	//cmds += "peer chaincode instantiate -o orderer.example.com:7050 -C mychannel -n mycc -v 1.0 -c"
 	cmds += "peer chaincode instantiate -o orderer.example.com:7050 -C mychannel -n mycc -v 1.0 -c '{\"Args\":[\"init\",\"a\",\"100\",\"b\",\"200\"]}' -P \"AND ('Org1MSP.peer')\";"
-	fmt.Printf("cmd is %v\n", cmds)
 	executeBatchSshCmd(cmds, hostname, user, passwd)
 }
 
