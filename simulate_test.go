@@ -1,6 +1,10 @@
 package main
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+	"time"
+)
 
 var (
 	hostname    = "192.168.100.132"
@@ -58,6 +62,13 @@ func TestInstallChaincode(t *testing.T) {
 
 func TestInstantiateChaincode(t *testing.T) {
 	instantiateChaincode(hostname, user_test, passwd_test)
+}
+
+func TestScpImagesViaInternet(t *testing.T) {
+	start := time.Now().Unix()
+	scpImagesViaInternet("192.168.4.174", "root", "shuqinkeji")
+	end := time.Now().Unix()
+	fmt.Printf("use time %v seconds\n", end-start)
 }
 
 func TestTestR(t *testing.T) {

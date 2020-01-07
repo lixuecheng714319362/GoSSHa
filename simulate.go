@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"runtime"
 	"sync"
 	"time"
 )
@@ -70,10 +69,10 @@ func sendFabricImages(hostname, user, passwd string) {
 	targetPrefix := "/home/" + user + "/fabric/images/"
 	sourcePrefix := "/home/lixuecheng/fabric/fabric_images/"
 
-	num := runtime.NumCPU()
-	fmt.Printf("cpu num is %v\n", num)
-	//GOMAXPROCS 设置可同时执行的最大CPU数
-	runtime.GOMAXPROCS(num)
+	// num := runtime.NumCPU()
+	// fmt.Printf("cpu num is %v\n", num)
+	// //GOMAXPROCS 设置可同时执行的最大CPU数
+	// runtime.GOMAXPROCS(num)
 	var files1 = []string{"baseos.tar", "ca.tar", "ccenv.tar", "couchdb.tar", "kafka.tar", "orderer.tar", "peer.tar", "zookeeper.tar"}
 	for i := 0; i < len(files1); i++ {
 		// wg.Add(1)
@@ -90,6 +89,18 @@ func sendFabricImages(hostname, user, passwd string) {
 	}
 
 	// wg.Wait()
+}
+
+func scpImagesViaInternet(hostname, user, passwd string) {
+	cmds := "cd /data/ssh_scp_test/images;"
+	executeBatchSshCmd(cmds, hostname, user, passwd)
+	fmt.Println("=====start scp images=====")
+	targetPrefix := "/data/ssh_scp_test/images/"
+	sourcePrefix := "/home/lixuecheng/fabric/fabric_images/"
+	var files1 = []string{"baseos.tar", "ca.tar", "ccenv.tar", "couchdb.tar", "kafka.tar", "orderer.tar", "peer.tar", "zookeeper.tar", "javaenv.tar", "tools.tar"}
+	for i := 0; i < len(files1); i++ {
+		executeCatByPwd(hostname, user, passwd, targetPrefix+files1[i], sourcePrefix+files1[i])
+	}
 }
 
 //tar -zcvf farbric images
