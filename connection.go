@@ -66,6 +66,7 @@ func executeCatByPwd(hostname, user, password, target, source string) (stdout, s
 
 	session, err := conn.NewSession()
 	if err != nil {
+		fmt.Printf("error is %v\n", err)
 		return
 	}
 	if disconnectAfterUse {

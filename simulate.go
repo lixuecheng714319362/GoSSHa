@@ -64,7 +64,7 @@ func sendFabricImages(hostname, user, passwd string) {
 	cmds += "touch tools.tar;"
 	executeBatchSshCmd(cmds, hostname, user, passwd)
 
-	// var wg sync.WaitGroup
+	var wg sync.WaitGroup
 	fmt.Println("=====start scp images=====")
 	targetPrefix := "/home/" + user + "/fabric/images/"
 	sourcePrefix := "/home/lixuecheng/fabric/fabric_images/"
@@ -75,20 +75,25 @@ func sendFabricImages(hostname, user, passwd string) {
 	// runtime.GOMAXPROCS(num)
 	var files1 = []string{"baseos.tar", "ca.tar", "ccenv.tar", "couchdb.tar", "kafka.tar", "orderer.tar", "peer.tar", "zookeeper.tar"}
 	for i := 0; i < len(files1); i++ {
-		// wg.Add(1)
-		// go func(tmp string) {
-		// 	defer wg.Done()
-		// 	executeCatByPwd(hostname, user, passwd, targetPrefix+tmp, sourcePrefix+tmp)
-		// }(files1[i])
-		executeCatByPwd(hostname, user, passwd, targetPrefix+files1[i], sourcePrefix+files1[i])
+		wg.Add(1)
+		go func(tmp string) {
+			defer wg.Done()
+			executeCatByPwd(hostname, user, passwd, targetPrefix+tmp, sourcePrefix+tmp)
+		}(files1[i])
+		// executeCatByPwd(hostname, user, passwd, targetPrefix+files1[i], sourcePrefix+files1[i])
 	}
 	// time.Sleep(2000)
-	var files2 = []string{"javaenv.tar", "tools.tar"}
+	var files2 = []string{"javaenv.tar.0", "javaenv.tar.1", "javaenv.tar.2", "tools.tar.0", "tools.tar.1"}
 	for i := 0; i < len(files2); i++ {
-		executeCatByPwd(hostname, user, passwd, targetPrefix+files2[i], sourcePrefix+files2[i])
+		//executeCatByPwd(hostname, user, passwd, targetPrefix+files2[i], sourcePrefix+files2[i])
+		wg.Add(1)
+		go func(tmp string) {
+			defer wg.Done()
+			executeCatByPwd(hostname, user, passwd, targetPrefix+tmp, sourcePrefix+tmp)
+		}(files2[i])
 	}
 
-	// wg.Wait()
+	wg.Wait()
 }
 
 func scpImagesViaInternet(hostname, user, passwd string) {
