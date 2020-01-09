@@ -209,7 +209,6 @@ func makeConfig() (config *ssh.ClientConfig, agentUnixSock net.Conn) {
 }
 
 func makeSigner(keyname string) (signer ssh.Signer, err error) {
-	fmt.Println("=======make every key=========")
 	fp, err := os.Open(keyname)
 	if err != nil {
 		if !os.IsNotExist(err) {
@@ -295,11 +294,9 @@ func makeSigner(keyname string) (signer ssh.Signer, err error) {
 }
 
 func makeSigners() {
-	fmt.Println("============make signers===============")
 	signers = []ssh.Signer{}
 
 	for _, keyname := range keys {
-		fmt.Printf("key name is %v\n", keyname)
 		signer, err := makeSigner(keyname)
 		if err == nil {
 			signers = append(signers, signer)
@@ -474,7 +471,6 @@ func initialize(internalInput bool) {
 	keysPath := os.Getenv("TMP_HOME")
 	keys = []string{keysPath + "/.ssh/id_rsa", keysPath + "/.ssh/id_dsa", keysPath + "/.ssh/id_ecdsa"}
 
-	fmt.Printf("keys is %v\n", keys)
 	if pubKey != "" {
 		if strings.HasSuffix(pubKey, ".pub") {
 			pubKey = strings.TrimSuffix(pubKey, ".pub")
@@ -711,7 +707,7 @@ func runProxy() {
 }
 
 func main() {
-	//initialize(false)
-	//sendProxyReply(&InitializeComplete{InitializeComplete: true})
-	//runProxy()
+	initialize(false)
+	sendProxyReply(&InitializeComplete{InitializeComplete: true})
+	runProxy()
 }

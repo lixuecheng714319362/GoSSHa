@@ -4,13 +4,12 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"golang.org/x/crypto/ssh"
 	"io/ioutil"
 	"log"
 	"net"
 	"os"
 	"strings"
-
-	"golang.org/x/crypto/ssh"
 )
 
 //连接一台主机，按照shell执行命令，执行完成后断开连接
@@ -50,6 +49,67 @@ func executeBatchSshCmd(cmds string, hostname, user, password string) (stdout, s
 		return
 	}
 	session.Wait()
+	stdout = stdoutBuf.String()
+	stderr = stderrBuf.String()
+	fmt.Printf("stdout is %v\n", stdout)
+	fmt.Printf("stderr is %v\n", stderr)
+	return
+}
+
+func executeCatByKey(hostname, user, target, source string) (stdout, stderr string, err error) {
+	conn, err := getConnectionByKey(hostname, user)
+	if err != nil {
+		return
+	}
+
+	session, err := conn.NewSession()
+	if err != nil {
+		fmt.Printf("error is %v\n", err)
+		return
+	}
+	if disconnectAfterUse {
+		defer connectedHosts.Close(hostname)
+	}
+	defer session.Close()
+
+	cmd := "cat >'" + strings.Replace(target, "'", "'\\''", -1) + "'"
+	fmt.Printf("cmd is %v\n", cmd)
+	stdinPipe, err := session.StdinPipe()
+	if err != nil {
+		return
+	}
+
+	var stdoutBuf bytes.Buffer
+	var stderrBuf bytes.Buffer
+	session.Stdout = &stdoutBuf
+	session.Stderr = &stderrBuf
+
+	fmt.Println("start run cmd")
+	err = session.Start(cmd)
+	if err != nil {
+		return
+	}
+
+	contents := readSourceFile(source)
+	for start, maxEnd := 0, len(contents); start < maxEnd; start += chunkSize {
+		// <-maxThroughputChan
+
+		end := start + chunkSize
+		if end > maxEnd {
+			end = maxEnd
+		}
+		_, err = stdinPipe.Write(contents[start:end])
+		if err != nil {
+			return
+		}
+	}
+
+	err = stdinPipe.Close()
+	if err != nil {
+		return
+	}
+
+	err = session.Wait()
 	stdout = stdoutBuf.String()
 	stderr = stderrBuf.String()
 	fmt.Printf("stdout is %v\n", stdout)
@@ -227,6 +287,41 @@ func getConnectionByPwd(hostname, user, password string) (conn *ssh.Client, err 
 	fmt.Println("connect success!=====")
 	return
 }
+
+//use private key to login
+func getConnectionByKey(hostname, username string) (conn *ssh.Client, err error) {
+	conn, ok := connectedHosts.Get(hostname)
+	if ok {
+		return
+	}
+	defer func() {
+		if msg := recover(); msg != nil {
+			err = errors.New("Panic: " + fmt.Sprint(msg))
+		}
+	}()
+
+	user = username
+	conf, agentConn := makeConfig()
+	if agentConn != nil {
+		defer agentConn.Close()
+	}
+	port := "22"
+	str := strings.SplitN(hostname, ":", 2)
+	if len(str) == 2 {
+		hostname = str[0]
+		port = str[1]
+	}
+	fmt.Printf("the host is %v, and the port is %v\n", hostname, port)
+
+	conn, err = ssh.Dial("tcp", hostname+":"+port, conf)
+	if err != nil {
+		return
+	}
+	//sendProxyReply(&ConnectionProgress{ConnectedHost: hostname})
+	connectedHosts.Set(hostname, conn)
+	return
+}
+
 
 func connectByPwd(hostName, user, password string) {
 	check := func(err error, msg string) {

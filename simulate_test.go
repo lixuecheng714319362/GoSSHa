@@ -12,10 +12,6 @@ var (
 	passwd_test = "lixuecheng"
 )
 
-func TestInstallEnvProcess(t *testing.T) {
-
-}
-
 func TestScpPack(t *testing.T) {
 	scpPack(hostname, user_test, passwd_test)
 }
@@ -71,6 +67,14 @@ func TestScpImagesViaInternet(t *testing.T) {
 	fmt.Printf("use time %v seconds\n", end-start)
 }
 
-func TestTestR(t *testing.T) {
-	testR()
+func TestSshByKey(t *testing.T) {
+	stdout, stderr, err := sshByKey(hostname, "lixuecheng", "/home/lixuecheng/.ssh", "uptime")
+	if err != nil {
+		fmt.Printf("error is %v\n", err)
+	}
+	fmt.Printf("stdout is %v\nstderr is %v\n", stdout, stderr)
+}
+
+func TestExecuteCatByKey(t *testing.T) {
+	executeCatByKey(hostname, "lixuecheng", "", "")
 }

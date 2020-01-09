@@ -1,9 +1,11 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
+	"golang.org/x/crypto/ssh"
+	"os"
 	"sync"
-	"time"
 )
 
 //安装环境
@@ -182,27 +184,44 @@ func instantiateChaincode(hostname, user, passwd string) {
 	executeBatchSshCmd(cmds, hostname, user, passwd)
 }
 
-var synWait sync.WaitGroup
+func sshByKey(hostname, username, keysPath, cmd string) (stdout, stderr string, err error) {
+	keys = []string{keysPath + "/id_rsa", keysPath + "/id_dsa", keysPath + "/id_ecdsa"}
+	signers = []ssh.Signer{}
 
-func testR() {
-
-	start := time.Now()
-	for i := 1; i <= 20; i++ {
-		synWait.Add(1)
-		go testNum(1)
+	for _, keyname := range keys {
+		fmt.Printf("key name is %v\n", keyname)
+		signer, err := makeSigner(keyname)
+		if err == nil {
+			signers = append(signers, signer)
+		}
 	}
-	synWait.Wait()
-	end := time.Now()
-	fmt.Println(end.Sub(start).Seconds())
+	sshAuthSock = os.Getenv("SSH_AUTH_SOCK")
+	fmt.Printf("sshauthsock is %v\n", sshAuthSock)
+	conn, err := getConnectionByKey(hostname, username)
+	if err != nil {
+		return
+	}
+
+	fmt.Println("start new session")
+	session, err := conn.NewSession()
+	if err != nil {
+		return
+	}
+	if disconnectAfterUse {
+		defer connectedHosts.Close(hostname)
+	}
+	defer session.Close()
+
+	var stdoutBuf bytes.Buffer
+	var stderrBuf bytes.Buffer
+	session.Stdout = &stdoutBuf
+	session.Stderr = &stderrBuf
+	fmt.Println("start run cmd")
+	err = session.Run(cmd)
+
+	stdout = stdoutBuf.String()
+	stderr = stderrBuf.String()
+
+	return
 }
 
-func testNum(num int) {
-	fmt.Println("=====execute test num")
-	for i := 1; i <= 10000000; i++ {
-		num = num + i
-		num = num - i
-		num = num * i
-		num = num / i
-	}
-	synWait.Done() // 相当于 synWait.Add(-1)
-}
