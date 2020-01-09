@@ -3,8 +3,6 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"golang.org/x/crypto/ssh"
-	"os"
 	"sync"
 )
 
@@ -185,19 +183,7 @@ func instantiateChaincode(hostname, user, passwd string) {
 }
 
 func sshByKey(hostname, username, keysPath, cmd string) (stdout, stderr string, err error) {
-	keys = []string{keysPath + "/id_rsa", keysPath + "/id_dsa", keysPath + "/id_ecdsa"}
-	signers = []ssh.Signer{}
-
-	for _, keyname := range keys {
-		fmt.Printf("key name is %v\n", keyname)
-		signer, err := makeSigner(keyname)
-		if err == nil {
-			signers = append(signers, signer)
-		}
-	}
-	sshAuthSock = os.Getenv("SSH_AUTH_SOCK")
-	fmt.Printf("sshauthsock is %v\n", sshAuthSock)
-	conn, err := getConnectionByKey(hostname, username)
+	conn, err := getConnectionByKey(hostname, username, keysPath)
 	if err != nil {
 		return
 	}

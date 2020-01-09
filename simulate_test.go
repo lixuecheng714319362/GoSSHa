@@ -76,5 +76,5 @@ func TestSshByKey(t *testing.T) {
 }
 
 func TestExecuteCatByKey(t *testing.T) {
-	executeCatByKey(hostname, "lixuecheng", "", "")
+	executeCatByKey(hostname, "lixuecheng", "/home/lixuecheng/.ssh", "/home/lixuecheng/fabric/images/tools.tar", "/home/lixuecheng/fabric/fabric_images/tools.tar")
 }

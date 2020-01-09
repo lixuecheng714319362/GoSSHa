@@ -56,8 +56,8 @@ func executeBatchSshCmd(cmds string, hostname, user, password string) (stdout, s
 	return
 }
 
-func executeCatByKey(hostname, user, target, source string) (stdout, stderr string, err error) {
-	conn, err := getConnectionByKey(hostname, user)
+func executeCatByKey(hostname, user, keysPath, target, source string) (stdout, stderr string, err error) {
+	conn, err := getConnectionByKey(hostname, user, keysPath)
 	if err != nil {
 		return
 	}
@@ -289,7 +289,19 @@ func getConnectionByPwd(hostname, user, password string) (conn *ssh.Client, err 
 }
 
 //use private key to login
-func getConnectionByKey(hostname, username string) (conn *ssh.Client, err error) {
+func getConnectionByKey(hostname, username, keysPath string) (conn *ssh.Client, err error) {
+	keys = []string{keysPath + "/id_rsa", keysPath + "/id_dsa", keysPath + "/id_ecdsa"}
+	signers = []ssh.Signer{}
+
+	for _, keyname := range keys {
+		fmt.Printf("key name is %v\n", keyname)
+		signer, err := makeSigner(keyname)
+		if err == nil {
+			signers = append(signers, signer)
+		}
+	}
+	sshAuthSock = os.Getenv("SSH_AUTH_SOCK")
+	fmt.Printf("sshauthsock is %v\n", sshAuthSock)
 	conn, ok := connectedHosts.Get(hostname)
 	if ok {
 		return
